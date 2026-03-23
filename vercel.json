@@ -1,14 +1,4 @@
 {
-  "framework": "vercel",
-  "functions": {
-    "api/score.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
-  "env": {
-    "DATABASE_URL": "@database-url"
-  },
   "buildCommand": "npm run build",
   "installCommand": "npm install"
 }
