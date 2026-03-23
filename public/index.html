@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流体智力测试 - IQ Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p {
+            color: #888;
+            font-size: 16px;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 16px;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #00d9ff;
+        }
+        .btn {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,217,255,0.3);
+        }
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            transition: width 0.3s;
+        }
+        .question-num {
+            color: #00d9ff;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .matrix-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .matrix-cell {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .matrix-cell:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .matrix-cell.selected {
+            border-color: #00d9ff;
+            background: rgba(0,217,255,0.2);
+        }
+        .matrix-cell.target {
+            background: rgba(0,255,136,0.1);
+            border-color: #00ff88;
+        }
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .option {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .option:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.05);
+        }
+        .option.selected {
+            border-color: #00d9ff;
+            background: rgba(0,217,255,0.2);
+        }
+        .result-score {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .score-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 20px 60px rgba(0,217,255,0.3);
+        }
+        .score-value {
+            font-size: 56px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+        .score-label {
+            font-size: 14px;
+            color: #1a1a2e;
+            opacity: 0.8;
+        }
+        .result-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .result-desc {
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .leaderboard {
+            margin-top: 30px;
+        }
+        .leaderboard h3 {
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .leaderboard-item:nth-child(1) .rank { color: #ffd700; }
+        .leaderboard-item:nth-child(2) .rank { color: #c0c0c0; }
+        .leaderboard-item:nth-child(3) .rank { color: #cd7f32; }
+        .info-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: rgba(0,217,255,0.2);
+            border-radius: 20px;
+            font-size: 12px;
+            color: #00d9ff;
+            margin-right: 10px;
+        }
+        .time-badge {
+            background: rgba(255,136,0,0.2);
+            color: #ff8800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 流体智力测试</h1>
+            <p>基于 Raven's Progressive Matrices - 矩阵推理</p>
+        </div>
+
+        <!-- 开始界面 -->
+        <div id="start-screen" class="screen active">
+            <div class="card">
+                <div class="input-group">
+                    <label>你的名字</label>
+                    <input type="text" id="username" placeholder="输入名字保存成绩" maxlength="20">
+                </div>
+                <div class="input-group">
+                    <label>年龄（用于更精确的IQ计算）</label>
+                    <select id="age">
+                        <option value="">选择年龄</option>
+                        <option value="10">10岁</option>
+                        <option value="11">11岁</option>
+                        <option value="12">12岁</option>
+                        <option value="13">13岁</option>
+                        <option value="14">14岁</option>
+                        <option value="15">15岁</option>
+                        <option value="16">16岁</option>
+                        <option value="17">17岁</option>
+                        <option value="18">18岁</option>
+                        <option value="19">19岁</option>
+                        <option value="20">20岁</option>
+                        <option value="21">21岁</option>
+                        <option value="22">22岁</option>
+                        <option value="23">23岁</option>
+                        <option value="24">24岁</option>
+                        <option value="25">25岁</option>
+                        <option value="26">26岁</option>
+                        <option value="27">27岁</option>
+                        <option value="28">28岁</option>
+                        <option value="29">29岁</option>
+                        <option value="30">30岁</option>
+                        <option value="35">35岁</option>
+                        <option value="40">40岁</option>
+                        <option value="45">45岁</option>
+                        <option value="50">50岁</option>
+                        <option value="55">55岁</option>
+                        <option value="60">60岁+</option>
+                    </select>
+                </div>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+                    📝 共 12 道矩阵推理题<br>
+                    ⏱️ 建议用时 8-12 分钟<br>
+                    🎯 根据年龄调整IQ评分标准
+                </p>
+                <button class="btn" onclick="startTest()">开始测试</button>
+            </div>
+        </div>
+
+        <!-- 测试界面 -->
+        <div id="test-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div class="card">
+                <div class="question-num">第 <span id="q-num">1</span> / 12 题</div>
+                <div id="question-content"></div>
+            </div>
+        </div>
+
+        <!-- 结果界面 -->
+        <div id="result-screen" class="screen">
+            <div class="card">
+                <div class="result-score">
+                    <div class="score-circle">
+                        <span class="score-value" id="score">0</span>
+                        <span class="score-label">IQ</span>
+                    </div>
+                    <h2 class="result-title" id="result-title">测试完成</h2>
+                    <p class="result-desc" id="result-desc"></p>
+                    <p style="color: #666; font-size: 14px;">
+                        用时: <span id="time-used">0</span> 秒 | 正确: <span id="correct-count">0</span>/12
+                    </p>
+                    <button class="btn" onclick="location.reload()" style="margin-top: 20px;">再测一次</button>
+                </div>
+                
+                <div class="leaderboard">
+                    <h3>🏆 排行榜 TOP 10</h3>
+                    <div id="leaderboard-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 流体智力测试题目 - 矩阵推理
+        // 基于 Raven's Progressive Matrices 风格
+        const questions = [
+            {
+                // Q1: 找规律 - 填充缺失
+                patterns: ['▲', '●', '■'],
+                matrix: [
+                    ['▲', '●', '■'],
+                    ['●', '■', '▲'],
+                    ['■', '?', '●']
+                ],
+                options: ['▲', '●', '■', '◆', '★', '●'],
+                answer: 1
+            },
+            {
+                // Q2: 旋转规律
+                patterns: ['↗', '↘', '↙', '↖'],
+                matrix: [
+                    ['↗', '↘'],
+                    ['↙', '↖']
+                ],
+                options: ['↗', '↘', '↙', '↖', '↑', '→'],
+                answer: 2
+            },
+            {
+                // Q3: 叠加规律
+                patterns: ['□', '△', '○'],
+                matrix: [
+                    ['□', '△', '○'],
+                    ['□', '□', '△'],
+                    ['○', '○', '?']
+                ],
+                options: ['□', '△', '○', '◇', '☆', '×'],
+                answer: 1
+            },
+            {
+                // Q4: 数量递变
+                matrix: [
+                    ['●', '●●', '●●●'],
+                    ['○○', '○○○', '?']
+                ],
+                options: ['○○○○', '○○○', '●●●●', '○○○○', '●●●', '○'],
+                answer: 0
+            },
+            {
+                // Q5: 形状组合
+                matrix: [
+                    ['▲', '●', '■'],
+                    ['■', '▲', '●'],
+                    ['?', '■', '▲']
+                ],
+                options: ['●', '■', '▲', '◆', '★', '▼'],
+                answer: 0
+            },
+            {
+                // Q6: 线条数量
+                matrix: [
+                    ['╲', '╱', '╳'],
+                    ['╱', '╲', '?']
+                ],
+                options: ['╲', '╱', '╳', '║', '═', '╔'],
+                answer: 2
+            },
+            {
+                // Q7: 对称规律
+                matrix: [
+                    ['A', 'B', 'C'],
+                    ['C', 'A', 'B'],
+                    ['B', 'C', '?']
+                ],
+                options: ['A', 'B', 'C', 'D', 'E', 'F'],
+                answer: 0
+            },
+            {
+                // Q8: 颜色/填充
+                matrix: [
+                    ['■', '□', '■'],
+                    ['□', '■', '□'],
+                    ['■', '?', '■']
+                ],
+                options: ['■', '□', '●', '▲', '◆', '○'],
+                answer: 1
+            },
+            {
+                // Q9: 位置移动
+                matrix: [
+                    ['●', '', ''],
+                    ['', '●', ''],
+                    ['', '', '●']
+                ],
+                options: ['●', '', '', '', '●', '', '', '', ''],
+                answer: 0
+            },
+            {
+                // Q10: 复杂规律
+                matrix: [
+                    ['1', '2', '3'],
+                    ['2', '4', '6'],
+                    ['3', '?', '9']
+                ],
+                options: ['4', '5', '6', '7', '8', '9'],
+                answer: 2
+            },
+            {
+                // Q11: 图形变换
+                matrix: [
+                    ['↔', '↕', '↔'],
+                    ['↕', '↔', '↕'],
+                    ['↔', '?', '↔']
+                ],
+                options: ['↔', '↕', '↗', '↘', '↙', '↖'],
+                answer: 1
+            },
+            {
+                // Q12: 综合规律
+                matrix: [
+                    ['●○', '○●', '●●'],
+                    ['○○', '●○', '○?'],
+                    ['●●', '○○', '●○']
+                ],
+                options: ['○●', '○○', '●●', '●○', '○○', '●○'],
+                answer: 3
+            }
+        ];
+
+        let currentQ = 0;
+        let answers = [];
+        let startTime;
+
+        function startTest() {
+            const name = document.getElementById('username').value.trim();
+            if (!name) {
+                alert('请输入名字');
+                return;
+            }
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('test-screen').classList.add('active');
+            startTime = Date.now();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQ];
+            const isPattern = q.patterns;
+            
+            let html = '';
+            
+            // 渲染矩阵
+            if (q.matrix) {
+                html += '<div class="matrix-container">';
+                for (let row = 0; row < q.matrix.length; row++) {
+                    for (let col = 0; col < q.matrix[row].length; col++) {
+                        const cell = q.matrix[row][col];
+                        const isTarget = (row === 2 && col === 1 && q.matrix[2][1] === '?');
+                        html += `<div class="matrix-cell ${isTarget ? 'target' : ''}">${cell}</div>`;
+                    }
+                }
+                html += '</div>';
+            }
+            
+            // 问题说明
+            html += `<p class="question-text">请选择正确的答案填入问号处：</p>`;
+            
+            // 选项
+            html += '<div class="options-grid">';
+            q.options.forEach((opt, i) => {
+                html += `<div class="option" data-index="${i}" onclick="selectOption(${i})">${opt}</div>`;
+            });
+            html += '</div>';
+            
+            html += `<button class="btn" id="next-btn" onclick="nextQuestion()" style="margin-top:20px;display:none;">${currentQ === 11 ? '查看结果' : '下一题'}</button>`;
+            
+            document.getElementById('question-content').innerHTML = html;
+            document.getElementById('q-num').textContent = currentQ + 1;
+            document.getElementById('progress').style.width = ((currentQ + 1) / 12 * 100) + '%';
+        }
+
+        function selectOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`.option[data-index="${index}"]`).classList.add('selected');
+            answers[currentQ] = index;
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (answers[currentQ] === undefined) {
+                alert('请选择一个答案');
+                return;
+            }
+            
+            if (currentQ < 11) {
+                currentQ++;
+                renderQuestion();
+                document.getElementById('next-btn').style.display = 'none';
+            } else {
+                finishTest();
+            }
+        }
+
+        function finishTest() {
+            const timeUsed = Math.floor((Date.now() - startTime) / 1000);
+            
+            // 计算正确答案数
+            let correct = 0;
+            answers.forEach((ans, i) => {
+                if (ans === questions[i].answer) correct++;
+            });
+            
+            // IQ 计算（基于标准差）
+            // 12题满分，标准：平均分6，标准差3
+            const baseIQ = 100;
+            const stdDev = 15;
+            const zScore = (correct - 6) / 3;
+            let iq = Math.round(baseIQ + zScore * stdDev);
+            iq = Math.max(60, Math.min(160, iq)); // 限制范围
+            
+            // 年龄校正（流体智力随年龄下降）
+            const age = parseInt(document.getElementById('age').value) || 25;
+            if (age >= 30) {
+                iq = Math.round(iq - (age - 25) * 0.5); // 30岁后逐年微降
+            }
+            
+            const name = document.getElementById('username').value.trim();
+            
+            // 保存成绩
+            fetch('/api/score', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, iq, time: timeUsed, correct, age })
+            }).then(() => loadLeaderboard());
+            
+            // 显示结果
+            document.getElementById('test-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            
+            document.getElementById('score').textContent = iq;
+            document.getElementById('time-used').textContent = timeUsed;
+            document.getElementById('correct-count').textContent = correct;
+            
+            let title = '', desc = '';
+            if (iq >= 130) {
+                title = '🌟 天才级！';
+                desc = '你的流体智力非常出色，超过了 99% 的人！';
+            } else if (iq >= 120) {
+                title = '✨ 优秀！';
+                desc = '非常优秀的推理能力，超过了 90% 的人！';
+            } else if (iq >= 110) {
+                title = '👍 中上';
+                desc = '高于平均水平，继续保持！';
+            } else if (iq >= 90) {
+                title = '📊 正常';
+                desc = '属于正常智力范围。';
+            } else if (iq >= 80) {
+                title = '💪 略低';
+                desc = '略低于平均，多做推理训练会有帮助。';
+            } else {
+                title = '🎯 加油';
+                desc = '别灰心，智力可以通过训练提升！';
+            }
+            
+            document.getElementById('result-title').textContent = title;
+            document.getElementById('result-desc').textContent = desc;
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch('/api/score?list=1');
+                const data = await res.json();
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = data.slice(0, 10).map((item, i) => `
+                    <div class="leaderboard-item">
+                        <span><span class="rank">#${i+1}</span> ${item.name}</span>
+                        <span>
+                            <span class="info-badge">IQ ${item.iq}</span>
+                            <span class="info-badge time-badge">${item.correct}/12</span>
+                        </span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.log('加载排行榜失败', e);
+            }
+        }
+    </script>
+</body>
+</html>
